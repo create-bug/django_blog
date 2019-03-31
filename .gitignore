@@ -7,3 +7,4 @@ logs
 config.py
 blog/migrations/
 account/migrations/
+*initial.py
