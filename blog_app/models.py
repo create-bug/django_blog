@@ -1,6 +1,8 @@
 from django.db import models
 from django.utils import timezone
 from django.contrib.auth.models import User
+from django.urls import reverse
+from taggit.managers import TaggableManager
 # Create your models here.
 
 class Post(models.Model):
@@ -11,12 +13,17 @@ class Post(models.Model):
     publish = models.DateTimeField(default=timezone.now())
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
+    tags = TaggableManager()
     
     class Meta:
         ordering = ('-publish',)
 
     def __str__(self):
         return self.title
+    
+    def get_absolute_url(self):
+        return reverse('blog:post_detail', args=[self.publish.year,self.publish.month, self.publish.day, self.slug])
+    
 
 class Comment(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='comments')
@@ -25,3 +32,9 @@ class Comment(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
     active = models.BooleanField(default=True) # 关闭不当评论
+
+    class Meta:
+        ordering = ('created',)
+    
+    def __str__(self):
+        return '{}：{}'.format(self.name, self.post)
