@@ -3,6 +3,7 @@
 
 {% block content %}
     <h1>登录</h1>
+    <p>新用户？<a href="{% url 'register' %}">注册</a></p>
     {% if form.errors %}
         <p>登录信息不匹配</p>
     {% else %}
