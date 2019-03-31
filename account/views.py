@@ -20,4 +20,4 @@ def user_login(request):
     else:
         form = LoginForm()
 
-    return render(request, 'templates/account/login', {'form':form})
+    return render(request, 'account/login.html', {'form':form})
