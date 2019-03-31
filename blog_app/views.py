@@ -50,7 +50,7 @@ def post_detail(request, year, month, day, post):
         comment_form = CommentForm()
     
     post_tags_ids = post.tags.values_list('id', flat=True)
-    similar_tags = Post.objects.filter(tags__in=post_tags_ids).exclude(id=post.id) #除去本文
+    similar_tags = Post.objects.all().filter(tags__in=post_tags_ids).exclude(id=post.id) #除去本文
     similar_post = similar_tags.annotate(same_tags=Count('tags')).order_by('-same_tags','-publish')[:4]
 
     return render(request, 'blog/detail.html', 
