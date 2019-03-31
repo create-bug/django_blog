@@ -2,10 +2,11 @@ from django.shortcuts import render, get_object_or_404
 from .models import Post, Comment
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.views.generic import ListView
-#from .forms import EmailPostForm, CommentForm, PostForm
+from .forms import CommentForm, PostForm
 #from django.core.mail import send_mail
 from taggit.models import Tag
 from django.db.models import Count
+from django.contrib.auth.decorators import login_required
 
 # Create your views here.
 
@@ -30,9 +31,51 @@ def post_list(request, tag_slug=None):
     return render(request, 'blog/list.html',{'page':page,'posts':posts,'tag':tag})
 
 
-def post_detail():
-    pass
+def post_detail(request, year, month, day, post):
+    post = get_object_or_404(Post, slug=post,
+        publish__year=year,publish__month=month,publish__day=day)
+    
+    # 列出对应评论
+    comments = post.comments.filter(active=True)
 
+    new_comment = None
+    if request.method == 'POST':
+        comment_form = CommentForm(data=request.POST)
+        if comment_form.is_valid():
+            # 创建数据对象但不保存
+            new_comment = comment_form.save(commit=False)
+            new_comment.post = post #外键为当前文章
+            new_comment.save()  # 评论写入
+    else:
+        comment_form = CommentForm()
+    '''
+    post_tags_ids = post.tags.values_list('id', flat=True)
+    similar_tags = Post.objects.filter(tags__in=post_tags_ids).exclude(id=post.id) #除去本文
+    similar_post = similar_tags.annotate(same_tags=Count('tags')).order_by('-same_tags','-publish')[:4]
 
-def create_post():
-    pass
+    return render(request, 'blog/post/detail.html', 
+        {'post':post, 'comments':comments,'new_comment':new_comment,
+        'comment_form':comment_form, 'similar_posts':similar_post,
+        'url_post':'/{}/{}/{}/{}/{}'.format('blog',year,month,day,post.slug)})
+    '''
+    return render(request, 'blog/detail.html', 
+        {'post':post, 'comments':comments,'new_comment':new_comment,
+        'comment_form':comment_form,
+        'url_post':'/{}/{}/{}/{}/{}'.format('blog',year,month,day,post.slug)})
+
+@login_required
+def create_post(request):
+    new_post = None
+
+    if request.method == 'POST':
+        post_form = PostForm(data=request.POST)
+        if post_form.is_valid():
+            new_post = post_form.save(commit=False)
+            new_post.author = request.user
+            new_post.save()
+    else:
+        post_form = PostForm()
+    
+    return render(request, 'blog/create_post.html', {'post_form':post_form, 
+      'new_post':new_post,})
+    

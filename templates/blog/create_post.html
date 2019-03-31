@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% block title %}新建文章{% endblock %}
+
+{% block content %}
+    {% if new_post %}
+        <p>文章已添加 <a href="{{new_post.get_absolute_url}}">查看该文章</a> 或 <a href="{% url 'index' %}">返回</a></p>
+    {% else %}
+        <h2>新建文章</h2>
+        <form action="{% url 'blog:create_blog' %}" method="POST">
+            {{ post_form.as_p }}
+            {% csrf_token %}
+            <p><input type="submit" value="提交"></p>
+        </form>
+    {% endif %}
+
+{% endblock %}

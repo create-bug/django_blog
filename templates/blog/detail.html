@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+{% block title %}
+    {{ post.title }}
+{% endblock %}
+
+{% block content %}
+    <h1>{{ post.title}}</h1>
+    {% if user.is_authenticated %}
+        <p><a href="{% url 'logout' %}">登出</a></p>
+    {% else %}
+        <p><a href="{%  url 'login' %}">登录</a></p>
+    {% endif %}
+
+    <p class="date">
+        {{ post.author }} 发布于 {{ post.publish }}
+    </p>
+    {{ post.body|linebreaks}}
+
+    {% with comments.count as total_comments %}
+        <h2>
+            {{ total_comments }} comment{{ total_comments|pluralize}}
+        </h2>
+    {% endwith %}
+
+    <h2>推荐阅读</h2>
+    {% for post in similar_posts %}
+        <p>
+            <a href="{{ post.get_absolute_url }}">{{ post.title }}</a>
+        </p>
+    {% empty %}
+        暂无推荐阅读
+    {% endfor %}
+
+    {% if new_comment %}
+        <h2>评论已添加</h2>
+    {% else %}
+        <h2>新增评论</h2>
+        <form action="{{ url_post }}" method="post">
+            {{ comment_form.as_p }}
+            {% csrf_token %}
+            <p><input type="submit" value="提交"></p>
+        </form>
+    {% endif %}
+    
+    <h2>历史评论</h2>
+    {% for comment in comments %}
+        <div class="comment">
+            <p class="info">
+                <br/>
+                {{ comment.name }} 发布于 {{ forloop.counter }}
+                {{ comment.created }}
+            </p>
+            {{ comment.body|linebreaks }}
+        </div>
+    {% empty %}
+        <p>暂无评论</p>
+    {% endfor %}
+
+{% endblock %}

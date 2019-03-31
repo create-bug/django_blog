@@ -4,6 +4,7 @@
 {% block content %}
     {% if user.is_authenticated %}
         <p><a href="{% url 'logout' %}">登出</a></p>
+        <p><a href="{% url 'blog:create_blog' %}">新建文章</a></p>
     {% else %}
         <p><a href="{%  url 'login' %}">登录</a></p>
     {% endif %}
