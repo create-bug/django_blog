@@ -48,12 +48,12 @@ def post_detail(request, year, month, day, post):
             new_comment.save()  # 评论写入
     else:
         comment_form = CommentForm()
-    '''
+    
     post_tags_ids = post.tags.values_list('id', flat=True)
     similar_tags = Post.objects.filter(tags__in=post_tags_ids).exclude(id=post.id) #除去本文
     similar_post = similar_tags.annotate(same_tags=Count('tags')).order_by('-same_tags','-publish')[:4]
 
-    return render(request, 'blog/post/detail.html', 
+    return render(request, 'blog/detail.html', 
         {'post':post, 'comments':comments,'new_comment':new_comment,
         'comment_form':comment_form, 'similar_posts':similar_post,
         'url_post':'/{}/{}/{}/{}/{}'.format('blog',year,month,day,post.slug)})
@@ -62,6 +62,7 @@ def post_detail(request, year, month, day, post):
         {'post':post, 'comments':comments,'new_comment':new_comment,
         'comment_form':comment_form,
         'url_post':'/{}/{}/{}/{}/{}'.format('blog',year,month,day,post.slug)})
+    '''
 
 @login_required
 def create_post(request):
@@ -72,7 +73,10 @@ def create_post(request):
         if post_form.is_valid():
             new_post = post_form.save(commit=False)
             new_post.author = request.user
+            
             new_post.save()
+            for i in post_form.cleaned_data['tags']:
+                new_post.tags.add(i)
     else:
         post_form = PostForm()
     
